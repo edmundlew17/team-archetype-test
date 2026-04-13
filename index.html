@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta property="og:title" content="团队里哪种不好惹的大佬？">
+<meta property="og:description" content="16题测出你是哪种风格的狠人 · 疯批·深度·抽象测试">
+<meta property="og:type" content="website">
+<title>团队里哪种不好惹的大佬？</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+SC:wght@300;400;700;900&display=swap');
+
+  :root {
+    --bg: #0a0a0a;
+    --surface: #111111;
+    --border: #222222;
+    --accent: #e8ff00;
+    --accent2: #ff3c3c;
+    --text: #f0f0f0;
+    --muted: #666;
+    --card: #161616;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans SC', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* NOISE TEXTURE OVERLAY */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.6;
+  }
+
+  /* ── SCREENS ── */
+  .screen { display: none; min-height: 100vh; }
+  .screen.active { display: flex; flex-direction: column; }
+
+  /* ── INTRO SCREEN ── */
+  #intro {
+    align-items: center;
+    justify-content: center;
+    padding: 40px 24px;
+    position: relative;
+  }
+
+  .intro-bg {
+    position: absolute;
+    inset: 0;
+    background: 
+      radial-gradient(ellipse 60% 40% at 80% 20%, rgba(232,255,0,0.06) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 60% at 20% 80%, rgba(255,60,60,0.05) 0%, transparent 60%);
+  }
+
+  .intro-inner {
+    position: relative;
+    max-width: 480px;
+    width: 100%;
+    text-align: center;
+  }
+
+  .tag-line {
+    font-size: 11px;
+    letter-spacing: 4px;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 28px;
+    font-weight: 700;
+  }
+
+  h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(52px, 14vw, 88px);
+    line-height: 0.9;
+    letter-spacing: -1px;
+    margin-bottom: 24px;
+  }
+
+  h1 span.red { color: var(--accent2); }
+  h1 span.yellow { color: var(--accent); }
+
+  .subtitle {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.8;
+    margin-bottom: 48px;
+    font-weight: 300;
+  }
+
+  .subtitle strong {
+    color: var(--text);
+    font-weight: 700;
+  }
+
+  .btn-start {
+    display: inline-block;
+    background: var(--accent);
+    color: #000;
+    font-family: 'Noto Sans SC', sans-serif;
+    font-weight: 900;
+    font-size: 16px;
+    padding: 18px 52px;
+    border: none;
+    cursor: pointer;
+    letter-spacing: 2px;
+    transition: all 0.15s;
+    position: relative;
+    clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+  }
+
+  .btn-start:hover {
+    background: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(232,255,0,0.3);
+  }
+
+  .label-row {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+  }
+
+  .label-pill {
+    font-size: 11px;
+    padding: 5px 14px;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    letter-spacing: 1px;
+  }
+
+  /* ── QUIZ SCREEN ── */
+  #quiz {
+    padding: 0;
+    align-items: stretch;
+  }
+
+  .quiz-header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .q-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    color: var(--accent);
+    min-width: 60px;
+  }
+
+  .progress-bar {
+    flex: 1;
+    height: 3px;
+    background: var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    transition: width 0.4s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  .quiz-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 40px 24px 60px;
+    max-width: 560px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .phase-badge {
+    display: inline-block;
+    font-size: 10px;
+    letter-spacing: 3px;
+    padding: 4px 12px;
+    margin-bottom: 24px;
+    font-weight: 700;
+    text-transform: uppercase;
+    width: fit-content;
+  }
+  .phase-1 { background: var(--accent2); color: #fff; }
+  .phase-2 { background: #1a3fff; color: #fff; }
+  .phase-3 { background: #7c3aed; color: #fff; }
+
+  .question-text {
+    font-size: clamp(18px, 5vw, 24px);
+    font-weight: 700;
+    line-height: 1.5;
+    margin-bottom: 36px;
+    letter-spacing: -0.3px;
+  }
+
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .option-btn {
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 20px 24px;
+    text-align: left;
+    cursor: pointer;
+    font-family: 'Noto Sans SC', sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    font-weight: 400;
+    transition: all 0.15s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .option-btn::before {
+    content: attr(data-label);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    color: var(--accent);
+    margin-right: 14px;
+    vertical-align: middle;
+  }
+
+  .option-btn:hover {
+    border-color: var(--accent);
+    background: #1a1a00;
+    transform: translateX(4px);
+  }
+
+  .option-btn.selected {
+    border-color: var(--accent);
+    background: #1c1c00;
+  }
+
+  .option-btn.selected::after {
+    content: '✓';
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--accent);
+    font-size: 18px;
+  }
+
+  .nav-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 40px;
+    gap: 16px;
+  }
+
+  .btn-prev {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 14px 28px;
+    cursor: pointer;
+    font-family: 'Noto Sans SC', sans-serif;
+    font-size: 13px;
+    transition: all 0.15s;
+  }
+  .btn-prev:hover { border-color: var(--text); color: var(--text); }
+
+  .btn-next {
+    background: var(--accent);
+    border: none;
+    color: #000;
+    padding: 14px 36px;
+    cursor: pointer;
+    font-family: 'Noto Sans SC', sans-serif;
+    font-weight: 900;
+    font-size: 14px;
+    letter-spacing: 1px;
+    transition: all 0.15s;
+    clip-path: polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%);
+  }
+  .btn-next:disabled { background: var(--border); color: var(--muted); cursor: not-allowed; clip-path: none; }
+  .btn-next:not(:disabled):hover { background: #fff; }
+
+  /* ── RESULT SCREEN ── */
+  #result {
+    align-items: center;
+    justify-content: flex-start;
+    padding: 0 0 80px;
+    position: relative;
+  }
+
+  .result-hero {
+    width: 100%;
+    background: linear-gradient(135deg, #0f0f0f 0%, #1a1a00 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 60px 24px 48px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .result-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 80% 60% at 50% 100%, rgba(232,255,0,0.08) 0%, transparent 70%);
+  }
+
+  .result-tag {
+    font-size: 10px;
+    letter-spacing: 4px;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    font-weight: 700;
+  }
+
+  .result-type {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(48px, 12vw, 80px);
+    line-height: 1;
+    margin-bottom: 8px;
+    position: relative;
+  }
+
+  .result-name {
+    font-size: 14px;
+    color: var(--muted);
+    letter-spacing: 2px;
+    margin-bottom: 36px;
+  }
+
+  .result-desc {
+    max-width: 480px;
+    margin: 0 auto;
+    font-size: 16px;
+    line-height: 1.9;
+    font-weight: 300;
+    color: #ccc;
+    position: relative;
+  }
+
+  .result-body {
+    max-width: 480px;
+    width: 100%;
+    padding: 48px 24px 0;
+  }
+
+  .score-section {
+    margin-bottom: 48px;
+  }
+
+  .score-label {
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+
+  .score-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 14px;
+  }
+
+  .score-dim {
+    font-size: 12px;
+    color: var(--muted);
+    width: 48px;
+    flex-shrink: 0;
+    font-weight: 700;
+    letter-spacing: 1px;
+  }
+
+  .score-track {
+    flex: 1;
+    height: 4px;
+    background: var(--border);
+    overflow: hidden;
+  }
+
+  .score-bar {
+    height: 100%;
+    background: var(--accent);
+    transition: width 1s cubic-bezier(0.4,0,0.2,1);
+    width: 0;
+  }
+
+  .score-val {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px;
+    color: var(--text);
+    width: 32px;
+    text-align: right;
+  }
+
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 40px 0;
+  }
+
+  .others-label {
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+
+  .others-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .other-card {
+    border: 1px solid var(--border);
+    padding: 14px 16px;
+  }
+
+  .other-name {
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 2px;
+  }
+
+  .other-pct {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px;
+    color: var(--muted);
+  }
+
+  .share-row {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 48px;
+  }
+
+  .btn-share {
+    background: none;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    padding: 16px;
+    cursor: pointer;
+    font-family: 'Noto Sans SC', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 1px;
+    transition: all 0.15s;
+    width: 100%;
+  }
+  .btn-share:hover { background: var(--accent); color: #000; }
+
+  .btn-retry {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 14px;
+    cursor: pointer;
+    font-family: 'Noto Sans SC', sans-serif;
+    font-size: 13px;
+    transition: all 0.15s;
+    width: 100%;
+  }
+  .btn-retry:hover { border-color: var(--text); color: var(--text); }
+
+  /* Animations */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .screen.active .intro-inner { animation: fadeUp 0.6s ease both; }
+  .quiz-body { animation: fadeUp 0.3s ease both; }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--accent);
+    color: #000;
+    padding: 12px 28px;
+    font-weight: 700;
+    font-size: 13px;
+    transition: transform 0.3s ease;
+    z-index: 9999;
+    white-space: nowrap;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<!-- INTRO -->
+<div id="intro" class="screen active">
+  <div class="intro-bg"></div>
+  <div class="intro-inner">
+    <div class="tag-line">· 领导力人格测试 · 16题 · 3分钟 ·</div>
+    <h1>
+      团队里<br>
+      <span class="red">哪种</span><br>
+      <span class="yellow">大佬</span>
+    </h1>
+    <div class="label-row">
+      <span class="label-pill">疯批组</span>
+      <span class="label-pill">深度组</span>
+      <span class="label-pill">抽象组</span>
+    </div>
+    <div class="subtitle">
+      <strong>16题</strong>测出你是哪种风格的狠人<br>
+      选最戳你第一反应的，别想太多
+    </div>
+    <button class="btn-start" onclick="startQuiz()">开始测试</button>
+  </div>
+</div>
+
+<!-- QUIZ -->
+<div id="quiz" class="screen">
+  <div class="quiz-header">
+    <div class="q-num" id="q-num">01</div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progress-fill"></div>
+    </div>
+    <div style="font-size:12px;color:var(--muted)" id="q-counter">1 / 16</div>
+  </div>
+  <div class="quiz-body" id="quiz-body">
+    <div class="phase-badge phase-1" id="phase-badge">暴躁组</div>
+    <div class="question-text" id="question-text"></div>
+    <div class="options" id="options"></div>
+    <div class="nav-row">
+      <button class="btn-prev" id="btn-prev" onclick="prevQ()">← 上一题</button>
+      <button class="btn-next" id="btn-next" onclick="nextQ()" disabled>继续 →</button>
+    </div>
+  </div>
+</div>
+
+<!-- RESULT -->
+<div id="result" class="screen">
+  <div class="result-hero" id="result-hero">
+    <div class="result-tag">你的类型是</div>
+    <div class="result-type" id="result-type"></div>
+    <div class="result-name" id="result-name"></div>
+    <div class="result-desc" id="result-desc"></div>
+  </div>
+  <div class="result-body">
+    <div class="score-section">
+      <div class="score-label">维度分析</div>
+      <div class="score-row">
+        <div class="score-dim">冲劲</div>
+        <div class="score-track"><div class="score-bar" id="bar-drive"></div></div>
+        <div class="score-val" id="val-drive">0</div>
+      </div>
+      <div class="score-row">
+        <div class="score-dim">愿景</div>
+        <div class="score-track"><div class="score-bar" id="bar-vision"></div></div>
+        <div class="score-val" id="val-vision">0</div>
+      </div>
+      <div class="score-row">
+        <div class="score-dim">稳健</div>
+        <div class="score-track"><div class="score-bar" id="bar-steady"></div></div>
+        <div class="score-val" id="val-steady">0</div>
+      </div>
+      <div class="score-row">
+        <div class="score-dim">执行</div>
+        <div class="score-track"><div class="score-bar" id="bar-exec"></div></div>
+        <div class="score-val" id="val-exec">0</div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div class="others-label">其他接近类型</div>
+    <div class="others-grid" id="others-grid"></div>
+    <div class="share-row">
+      <button class="btn-share" onclick="copyResult()">📋 复制结果去晒</button>
+      <button class="btn-retry" onclick="restartQuiz()">重新测一次</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast">已复制！去朋友圈晒吧 🔥</div>
+
+<script>
+// ── QUESTIONS ──
+// scoring: [drive, vision, steady, exec]
+// each option adds to dimensions
+const questions = [
+  // 1-4: 暴躁组
+  {
+    phase: 1,
+    text: "项目预算突然被砍一半，你第一反应？",
+    options: [
+      { text: "操，直接把目标改成用1/3预算干翻10倍，不然老子立马辞职", score: [3,1,0,0] },
+      { text: "去他妈的，预算砍了就砍了，老子一个人也要把这项目干爆", score: [2,0,0,3] },
+      { text: "爱砍不砍，不干了，世界这么操蛋谁还陪你们玩", score: [1,2,1,0] },
+    ]
+  },
+  {
+    phase: 1,
+    text: "deadline前一天团队还在推责任扯皮，你会？",
+    options: [
+      { text: "直接吼一句"都他妈闭嘴，老子今晚通宵干完"", score: [2,0,0,3] },
+      { text: "当场发火把方案全撕了："这种垃圾也敢拿出来？"", score: [1,0,0,2] },
+      { text: "冷笑一声："行，都别干了，等着公司一起死"", score: [0,1,2,1] },
+    ]
+  },
+  {
+    phase: 1,
+    text: "投资人问你三年计划，你最真实的回答是？",
+    options: [
+      { text: "三年？老子明年就干翻整个行业，不然不玩了", score: [3,1,0,0] },
+      { text: ""你们懂个屁，我们要的是把这个破世界砸出个坑"", score: [2,2,0,0] },
+      { text: ""计划就是把所有挡路的人和公司全部干爆"", score: [1,0,0,3] },
+    ]
+  },
+  {
+    phase: 1,
+    text: "看到同事明显摸鱼摆烂，你会？",
+    options: [
+      { text: "当场开掉，爱干不干，不干滚蛋", score: [1,0,0,3] },
+      { text: "直接群里@他："要么给我干到死，要么现在打包走人"", score: [2,0,0,2] },
+      { text: "冷冷一句："继续摆，摆到公司倒闭大家一起完蛋"", score: [0,1,2,1] },
+    ]
+  },
+  // 5-8: 深度组
+  {
+    phase: 2,
+    text: "公司遇到重大危机，所有人慌乱时，你会？",
+    options: [
+      { text: "冷静计算长期复利，判断现在是该收缩还是继续压强", score: [0,0,3,2] },
+      { text: "系统性分析所有变量，重新制定多套长期应对方案", score: [0,1,2,2] },
+      { text: "聚焦核心护城河，把资源集中到能产生十年复利的部分", score: [0,2,3,0] },
+    ]
+  },
+  {
+    phase: 2,
+    text: "你认为最有价值的决策方式是？",
+    options: [
+      { text: "用数据和模型把所有可能结果跑透，选长期价值最大的那条", score: [0,1,1,3] },
+      { text: "建立系统和流程，让每一步都经得起时间检验", score: [0,0,3,2] },
+      { text: "拒绝短期诱惑，坚持把一件事情做到极致深度", score: [0,2,2,1] },
+    ]
+  },
+  {
+    phase: 2,
+    text: "面对一个短期暴利但有长期风险的项目，你？",
+    options: [
+      { text: "用完整框架算清楚10年ROI，风险大于收益就坚决放弃", score: [0,1,2,3] },
+      { text: "评估它对核心能力积累和品牌护城河的长期影响", score: [0,2,2,1] },
+      { text: "优先考虑是否符合公司长期战略节奏和资源配置", score: [0,0,3,2] },
+    ]
+  },
+  {
+    phase: 2,
+    text: "你最认可的长期成功逻辑是？",
+    options: [
+      { text: "持续复利 + 极致耐心，把小优势积累成无法超越的壁垒", score: [0,0,3,1] },
+      { text: "系统化思考 + 深度专注，把一件事情做到别人无法复制", score: [0,1,2,2] },
+      { text: "长期压强 + 节奏控制，在时间维度上碾压对手", score: [1,0,2,2] },
+    ]
+  },
+  // 9-16: 抽象搞笑组
+  {
+    phase: 3,
+    text: "新项目启动，你最先想的是？",
+    options: [
+      { text: "这玩意儿能不能让用户用完直接原地尖叫"真他妈香"？", score: [0,3,0,1] },
+      { text: "执行力拉满，谁拖后腿我直接雷霆出击军令状伺候", score: [1,0,0,3] },
+      { text: "流量能不能像核弹一样爆炸？不爆炸我睡不着觉", score: [2,1,0,1] },
+    ]
+  },
+  {
+    phase: 3,
+    text: "半夜两点你最可能在干嘛？",
+    options: [
+      { text: "还在抠产品细节，改到用户跪下喊爸爸", score: [0,3,0,1] },
+      { text: "盯着执行进度表，像催命鬼一样一个一个@", score: [1,0,0,3] },
+      { text: "刷竞品数据，脑子里已经脑补流量暴涨的烟花现场", score: [2,1,0,1] },
+    ]
+  },
+  {
+    phase: 3,
+    text: "你最想喊的团队口号是？",
+    options: [
+      { text: ""Are you OK？！不香我们一起死！"", score: [0,3,0,1] },
+      { text: ""说到做到！不服就干！干不成就雷霆劈了！"", score: [2,0,0,3] },
+      { text: ""流量为王，低价好货，谁不让增长我跟谁急眼！"", score: [3,1,0,0] },
+    ]
+  },
+  {
+    phase: 3,
+    text: "你最容易发火的瞬间是？",
+    options: [
+      { text: "产品做得又丑又卡，用户体验像吃屎", score: [0,3,0,1] },
+      { text: "执行力拉胯，还找一堆抽象借口", score: [1,0,0,3] },
+      { text: "流量突然不涨了，像被世界背叛了一样", score: [3,1,0,0] },
+    ]
+  },
+  {
+    phase: 3,
+    text: "你在团队里最变态的能力是？",
+    options: [
+      { text: "一开口就能把所有人洗脑到热血沸腾", score: [1,3,0,0] },
+      { text: "整合资源像玩拼图，啪一下就把大盘子搭起来", score: [0,1,2,2] },
+      { text: "表面云淡风轻，其实把所有人命运捏在手里慢慢扭", score: [0,1,3,1] },
+    ]
+  },
+  {
+    phase: 3,
+    text: "你最爽的画面是？",
+    options: [
+      { text: "全场被你演讲讲到哭着喊"跟老大走！"", score: [1,3,0,0] },
+      { text: "各种资源人脉被你像搭积木一样完美组合", score: [0,1,2,2] },
+      { text: "大家以为是自己决定的，其实早就被你暗中操控", score: [0,0,3,2] },
+    ]
+  },
+  {
+    phase: 3,
+    text: "如果公司要完蛋了，你会？",
+    options: [
+      { text: "开最后一场史诗级演讲，让大家"死也要死得惊天动地"", score: [1,3,0,0] },
+      { text: "雷霆整合所有资源，拼最后一波核爆翻盘", score: [2,0,0,3] },
+      { text: "抽象一笑："散了散了，下辈子再组团来干爆世界"", score: [0,2,2,0] },
+    ]
+  },
+  {
+    phase: 3,
+    text: "你最抽象的一点是？",
+    options: [
+      { text: "不洗脑别人就浑身难受，像缺了某种抽象的快乐", score: [0,3,0,0] },
+      { text: "看到资源浪费就犯病，想把全世界效率都优化一遍", score: [0,0,2,3] },
+      { text: "对丑和low的东西有物理性反胃，看到就想雷霆整改", score: [0,2,0,2] },
+    ]
+  },
+];
+
+// ── RESULTS ──
+// Each result: match by dominant dimension combo
+// dims: [drive, vision, steady, exec]
+const results = [
+  {
+    id: "elon",
+    name: "极限冲刺型",
+    ref: "Elon Musk",
+    desc: "想到就干，目标直接拉满。你是那种会把目标拉满再往前冲的人，推进速度极快，但也容易忽略现实约束，赌对很猛，赌错也很伤。",
+    match: (d,v,s,e) => d >= 8 && d > v && d > s,
+  },
+  {
+    id: "jobs",
+    name: "结果洁癖型",
+    ref: "Steve Jobs",
+    desc: "不接受平庸，只要最好的结果。你对结果有洁癖，能把事情打磨到极致，但对人要求很高，合作起来压力不小。",
+    match: (d,v,s,e) => v >= 8 && e >= 6 && v > d && v > s,
+  },
+  {
+    id: "bezos",
+    name: "长期压强型",
+    ref: "Jeff Bezos",
+    desc: "长期承压，把事情做深。你推进事情很狠，愿意长期承压，但对效率要求极高，也容易让人觉得有压迫感。",
+    match: (d,v,s,e) => s >= 8 && e >= 6 && d >= 4 && s > v,
+  },
+  {
+    id: "zuck",
+    name: "快速试错型",
+    ref: "Mark Zuckerberg",
+    desc: "先上线再优化，一路迭代。你行动很快，习惯先做再改，不断试错，但节奏太快时，也容易忽略长期影响。",
+    match: (d,v,s,e) => d >= 6 && e >= 6 && d+e > v+s,
+  },
+  {
+    id: "jensen",
+    name: "技术执行型",
+    ref: "Jensen Huang",
+    desc: "对技术和结果要求都很高，执行力很强。你对技术和结果要求都很高，但也容易让身边人跟不上你的标准。",
+    match: (d,v,s,e) => e >= 9 && v >= 5 && e > d,
+  },
+  {
+    id: "altman",
+    name: "押注未来型",
+    ref: "Sam Altman",
+    desc: "敢在不确定中下注。你习惯押未来方向，敢在不确定中下注，但有时候会显得不够接地气。",
+    match: (d,v,s,e) => d >= 6 && v >= 7 && d+v > s+e,
+  },
+  {
+    id: "jack",
+    name: "叙事带人型",
+    ref: "Jack Ma",
+    desc: "靠愿景和表达把人聚起来。你很会调动人和讲愿景，能把团队聚在一起，但有时候太理想化，落地需要别人补细节。",
+    match: (d,v,s,e) => v >= 9 && d < 6,
+  },
+  {
+    id: "pony",
+    name: "技术理想型",
+    ref: "Pony Ma",
+    desc: "偏内敛，但长期做深技术与产品。你不爱多说，但判断很深，很多事早就看明白了，只是不会第一时间表达出来。",
+    match: (d,v,s,e) => v >= 6 && s >= 6 && d < 5 && e < 7,
+  },
+  {
+    id: "lei",
+    name: "创新产品型",
+    ref: "Lei Jun",
+    desc: "重产品、重用户体验。你懂用户、接地气，容易让人跟你做事，但有时候在关键决策上不够强硬。",
+    match: (d,v,s,e) => v >= 7 && s >= 5 && d >= 3 && d < 7,
+  },
+  {
+    id: "buffett",
+    name: "稳健复利型",
+    ref: "Warren Buffett",
+    desc: "慢慢来，但越来越强。你更看重长期和确定性，做事稳、耐心强，但节奏偏慢，也容易错过机会。",
+    match: (d,v,s,e) => s >= 9 && d < 5 && e < 7,
+  },
+  {
+    id: "tim",
+    name: "节奏控制型",
+    ref: "Tim Cook",
+    desc: "不求猛，但一直稳。你擅长控制节奏，把事情稳稳推进，但也容易显得不够激进。",
+    match: (d,v,s,e) => s >= 7 && e >= 7 && d < 5 && v < 6,
+  },
+  {
+    id: "satya",
+    name: "隐性掌控型",
+    ref: "Satya Nadella",
+    desc: "不张扬，但能慢慢改变全局。你风格温和，更擅长慢慢改变局面，但有时候不够锋利。",
+    match: (d,v,s,e) => s >= 7 && d < 4,
+  },
+];
+
+// ── STATE ──
+let answers = new Array(16).fill(null);
+let current = 0;
+
+function startQuiz() {
+  showScreen('quiz');
+  renderQ();
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function renderQ() {
+  const q = questions[current];
+  const n = current + 1;
+
+  document.getElementById('q-num').textContent = String(n).padStart(2, '0');
+  document.getElementById('q-counter').textContent = `${n} / 16`;
+  document.getElementById('progress-fill').style.width = `${(n / 16) * 100}%`;
+
+  const badge = document.getElementById('phase-badge');
+  const phases = ['', '暴躁组', '深度组', '抽象组'];
+  const phaseClasses = ['', 'phase-1', 'phase-2', 'phase-3'];
+  badge.textContent = phases[q.phase];
+  badge.className = 'phase-badge ' + phaseClasses[q.phase];
+
+  document.getElementById('question-text').textContent = q.text;
+
+  const opts = document.getElementById('options');
+  opts.innerHTML = '';
+  q.options.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn' + (answers[current] === i ? ' selected' : '');
+    btn.setAttribute('data-label', ['A','B','C'][i]);
+    btn.appendChild(document.createTextNode(opt.text));
+    btn.onclick = () => selectOption(i);
+    opts.appendChild(btn);
+  });
+
+  document.getElementById('btn-prev').style.visibility = current === 0 ? 'hidden' : 'visible';
+  document.getElementById('btn-next').disabled = answers[current] === null;
+  document.getElementById('btn-next').textContent = current === 15 ? '查看结果 →' : '继续 →';
+
+  // re-trigger animation
+  const body = document.getElementById('quiz-body');
+  body.style.animation = 'none';
+  body.offsetHeight;
+  body.style.animation = 'fadeUp 0.3s ease both';
+}
+
+function selectOption(i) {
+  answers[current] = i;
+  document.querySelectorAll('.option-btn').forEach((b, idx) => {
+    b.classList.toggle('selected', idx === i);
+  });
+  document.getElementById('btn-next').disabled = false;
+}
+
+function nextQ() {
+  if (answers[current] === null) return;
+  if (current < 15) {
+    current++;
+    renderQ();
+  } else {
+    showResult();
+  }
+}
+
+function prevQ() {
+  if (current > 0) { current--; renderQ(); }
+}
+
+function calcScores() {
+  let drive = 0, vision = 0, steady = 0, exec = 0;
+  answers.forEach((ans, qi) => {
+    if (ans === null) return;
+    const s = questions[qi].options[ans].score;
+    drive += s[0]; vision += s[1]; steady += s[2]; exec += s[3];
+  });
+  return { drive, vision, steady, exec };
+}
+
+function showResult() {
+  const { drive, vision, steady, exec } = calcScores();
+
+  // Find matching result
+  let matched = null;
+  for (const r of results) {
+    if (r.match(drive, vision, steady, exec)) { matched = r; break; }
+  }
+  // fallback: pick by highest dim
+  if (!matched) {
+    const dims = [drive, vision, steady, exec];
+    const maxIdx = dims.indexOf(Math.max(...dims));
+    const fallbacks = ['elon','jobs','buffett','jensen'];
+    matched = results.find(r => r.id === fallbacks[maxIdx]);
+  }
+
+  document.getElementById('result-type').textContent = matched.name;
+  document.getElementById('result-name').textContent = matched.ref;
+  document.getElementById('result-desc').textContent = matched.desc;
+
+  // Score bars
+  const total = drive + vision + steady + exec || 1;
+  setTimeout(() => {
+    ['drive','vision','steady','exec'].forEach((dim, i) => {
+      const val = [drive, vision, steady, exec][i];
+      const pct = Math.round((val / total) * 100);
+      document.getElementById('bar-' + dim).style.width = pct + '%';
+      document.getElementById('val-' + dim).textContent = val;
+    });
+  }, 200);
+
+  // Others grid — sort by score similarity
+  const scored = results.filter(r => r.id !== matched.id).map(r => {
+    // rough proximity score
+    const sim = r.match(drive, vision, steady, exec) ? 80 : Math.floor(Math.random() * 30 + 30);
+    return { ...r, sim };
+  }).sort((a,b) => b.sim - a.sim).slice(0, 4);
+
+  const grid = document.getElementById('others-grid');
+  grid.innerHTML = '';
+  scored.forEach(r => {
+    const card = document.createElement('div');
+    card.className = 'other-card';
+    card.innerHTML = `<div class="other-name">${r.name}</div><div style="font-size:11px;color:var(--muted);margin-bottom:4px">${r.ref}</div>`;
+    grid.appendChild(card);
+  });
+
+  showScreen('result');
+
+  // store for share
+  window._resultData = { matched, drive, vision, steady, exec };
+}
+
+function copyResult() {
+  const d = window._resultData;
+  if (!d) return;
+  const text = `【团队里哪种不好惹的大佬】\n\n我测出来是：${d.matched.name}\n参照大佬：${d.matched.ref}\n\n${d.matched.desc}\n\n你也来测测 👇`;
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(showToast);
+  } else {
+    const ta = document.createElement('textarea');
+    ta.value = text; document.body.appendChild(ta);
+    ta.select(); document.execCommand('copy');
+    document.body.removeChild(ta);
+    showToast();
+  }
+}
+
+function showToast() {
+  const t = document.getElementById('toast');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function restartQuiz() {
+  answers = new Array(16).fill(null);
+  current = 0;
+  startQuiz();
+}
+</script>
+</body>
+</html>
